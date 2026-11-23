@@ -24,7 +24,10 @@ a { color: var(--accent); }
 .venue { margin: 0 0 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; margin: 0 auto 14px; max-width: 22ch; text-wrap: balance; }
 h1 .name { color: var(--accent); }
-.authors { color: var(--muted); margin: 0 0 22px; }
+.authors { margin: 0 0 6px; font-size: 17px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
+.affils { color: var(--muted); margin: 0 0 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
+.notes { color: var(--muted); font-size: 13px; margin: 0 0 22px; }
+.bibtex { max-width: 80ch; margin: 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font: 13px/1.5 var(--mono); }
 .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .btn { display: inline-block; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); text-decoration: none; font: 500 14px/1.2 var(--sans); cursor: pointer; }
 .btn:hover { border-color: var(--accent); color: var(--accent); }

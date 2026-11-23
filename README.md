@@ -1,4 +1,4 @@
-# RayCal project page (anonymous, for review)
+# RayCal project page
 
 Static page with no build step: `index.html`, `assets/css/style.css`, `assets/js/explorer.js`.
 Open `index.html` through any static server, e.g. `python3 -m http.server` in this folder.
@@ -12,10 +12,7 @@ Open `index.html` through any static server, e.g. `python3 -m http.server` in th
 `tools/build_results.py OUT_DIR [WORKERS]` renders `assets/results/` from the benchmark data and the reported runs.
 It reads the local data root from the environment variable `RAYCAL_ROOT`.
 
-## Keeping the page anonymous
-- No author names, affiliations, logos, repository or video links, analytics, cookies or third-party fonts/scripts.
-- Do not commit machine paths or user names (job scripts and logs are ignored by `.gitignore`).
-- Commit with an anonymous identity: `git config user.name anonymous; git config user.email anonymous@example.com`.
-- Before deploying, check: `grep -rIl -i -e "<your name>" -e "<your lab>" -e "/home/" -e "/groups/" .`
-- Deploy for review through an anonymizing host (e.g. anonymous.4open.science, which can serve a repository's
-  GitHub Pages under an anonymous URL) and put only that URL in the supplementary material.
+## Deployment
+GitHub Pages from this repository: Settings -> Pages -> Deploy from a branch -> `main`, `/ (root)`.
+The page keeps `noindex` until the arXiv version is public; remove that line in `index.html` at release.
+Links marked "coming soon" (arXiv, code) are placeholders to fill in at release.
