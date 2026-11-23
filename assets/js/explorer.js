@@ -64,7 +64,7 @@
     const seg = [w[0] + w[1] + w[2] + w[3] + 3 * GAP, w[4] + w[5] + GAP, w[6] + w[7] + GAP, w[8]];
     const gap = GAP + EXTRA;   // space between the groups
     h.style.gridTemplateColumns = `${seg[0]}fr ${gap}fr ${seg[1]}fr ${gap}fr ${seg[2]}fr ${gap}fr ${seg[3]}fr`;
-    ['Input frames', '', 'Ground truth', '', 'Error: baseline · RayCal', '', 'Support'].forEach(t => {
+    ['Input frame examples', '', 'Ground truth', '', 'Error: baseline · RayCal', '', 'Support'].forEach(t => {
       const s = document.createElement('span'); s.textContent = t; if (t) s.title = t; h.appendChild(s);
     });
     return h;
