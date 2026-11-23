@@ -58,6 +58,18 @@
     return d;
   }
 
+  // Column header laid out on the same pixel grid as the strips: frames, ground truth, the two error maps, support.
+  function header(w) {
+    const h = document.createElement('div'); h.className = 'colhead'; h.setAttribute('aria-hidden', 'true');
+    const seg = [w[0] + w[1] + w[2] + w[3] + 3 * GAP, w[4] + w[5] + GAP, w[6] + w[7] + GAP, w[8]];
+    const gap = GAP + EXTRA;   // space between the groups
+    h.style.gridTemplateColumns = `${seg[0]}fr ${gap}fr ${seg[1]}fr ${gap}fr ${seg[2]}fr ${gap}fr ${seg[3]}fr`;
+    ['Input frames', '', 'Ground truth', '', 'Error: baseline · RayCal', '', 'Support'].forEach(t => {
+      const s = document.createElement('span'); s.textContent = t; if (t) s.title = t; h.appendChild(s);
+    });
+    return h;
+  }
+
   // Missing scores sort last; the improvement is the best baseline's Mean over ours (no baseline output counts as largest).
   const ours = r => (r.ours && r.ours[0] != null) ? r.ours[0] : Infinity;
   const base = r => (r.best && r.best[1] != null) ? r.best[1] : Infinity;
@@ -81,6 +93,8 @@
       current = g.rows.filter(r => !q || r.label.toLowerCase().includes(q));
       sortRows(current);
       rowsEl.innerHTML = ''; rowsEl.scrollTop = 0; shown = 0;
+      const first = g.rows.find(r => r.widths);
+      if (first) rowsEl.appendChild(header(first.widths));
     }
     const next = current.slice(shown, shown + PAGE);
     const frag = document.createDocumentFragment();
