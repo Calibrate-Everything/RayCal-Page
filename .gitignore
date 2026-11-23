@@ -1,0 +1,6 @@
+# local job scripts and logs contain machine paths; keep them out of the repository
+tools/job_*.sh
+tools/build.log
+__pycache__/
+*.pyc
+.DS_Store

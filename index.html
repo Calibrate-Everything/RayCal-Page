@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>RayCal</title>
+<meta name="description" content="Anonymous project page for a CVPR 2027 submission: calibrating generic ray models for any camera from video.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="venue">Anonymous CVPR 2027 Submission</p>
+    <h1><span class="name">RayCal</span>: Calibrating Generic Ray Models for Any Camera from Video in the Wild</h1>
+    <p class="authors">Anonymous authors &middot; Paper under double-blind review</p>
+    <nav class="links" aria-label="Page sections">
+      <a class="btn" href="#abstract">Abstract</a>
+      <a class="btn" href="#method">Method</a>
+      <a class="btn primary" href="#explorer">Results Explorer</a>
+      <a class="btn" href="#qualitative">Qualitative</a>
+      <span class="btn disabled" title="Released after review">Code (after review)</span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <figure class="teaser">
+    <img src="assets/figures/teaser.jpg" alt="A wall of camera images and their recovered ray maps, next to a ray sphere with poses and landmarks" loading="eager">
+    <figcaption><b>RayCal</b> recovers a generic ray map&mdash;one viewing ray per pixel&mdash;for pinhole, fisheye, panoramic and catadioptric cameras from tens of video frames, without a calibration target or a parametric lens model.</figcaption>
+  </figure>
+
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p>We present RayCal, a target-free calibration framework that recovers any central camera's ray map from tens of video frames without restricting the camera motion. Instead of a parametric lens model, the ray map is a continuous pixel-to-ray mapping that accommodates arbitrary smooth, invertible distortion. RayCal jointly optimizes the ray map, camera poses and 3D landmarks from pretrained dense correspondences. Such matchers degrade under strong distortion, yet removing the distortion requires the calibration itself. Our key insight is that tracking and calibration can improve each other from an imperfect start: Progressive Retracking resamples the video through the current ray map into less distorted pinhole views, where the matcher tracks more accurately, and the new tracks in turn refine the ray map. Within the optimization, Iterative Track Admission likewise re-tests previously rejected tracks as the geometry improves. We also provide support maps that show where the calibration is well constrained and where more observations would help. Across pinhole, fisheye, panoramic and catadioptric cameras under highly complex distortion, RayCal reaches mean angular errors as low as 0.02&deg; and reduces error by up to an order of magnitude over state-of-the-art baselines.</p>
+  </section>
+
+  <section id="method">
+    <h2>Method</h2>
+    <figure>
+      <img src="assets/figures/pipeline.jpg" alt="Pipeline: video input, correspondence frontend, bundle adjustment with Iterative Track Admission and joint optimization, Progressive Retracking loop, outputs ray map, support and mask" loading="lazy">
+      <figcaption>From a video, a dense matcher produces tracks with localization covariances. Bundle adjustment jointly estimates the ray map, poses and landmarks; <b>Iterative Track Admission</b> re-tests tracks whose triangulation failed under the current geometry. <b>Progressive Retracking</b> resamples the video through the current ray map into less distorted pinhole views and tracks again. The outputs are the ray map, its support and the valid-pixel mask.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/figures/retracking.jpg" alt="Progressive Retracking on a rotated panoramic camera: warps and angular errors before and after retracking" loading="lazy">
+      <figcaption><b>Progressive Retracking</b> on a rotated panorama. Matching in the original image is inaccurate at the seam and near the pole; matching in pinhole views resampled through the current ray map is not.</figcaption>
+    </figure>
+  </section>
+
+  <section id="explorer">
+    <h2>Results Explorer</h2>
+    <p class="lede">Every sequence of the benchmark, with the same results as the paper's tables. Each row shows four input frames, the ground-truth ray sphere and ray map, the angular error of the best baseline on that sequence and of RayCal (after one global rotation), and RayCal's support map.</p>
+    <div class="controls" role="group" aria-label="Explorer controls">
+      <div class="seg" role="tablist" aria-label="Benchmark">
+        <button role="tab" data-kind="main" aria-selected="true">Main benchmark</button>
+        <button role="tab" data-kind="dist" aria-selected="false">Distortion study</button>
+      </div>
+      <label>Set <select id="group"></select></label>
+      <label>Error <select id="style"><option value="mag">Magnitude</option><option value="dir">Direction</option></select></label>
+      <label class="grow">Find <input id="find" type="search" placeholder="sequence name" autocomplete="off"></label>
+      <span id="count" class="count" aria-live="polite"></span>
+    </div>
+    <div class="legend">
+      <span class="key"><span class="ramp mag"></span><span class="mono">0.01&deg; &hellip; 10&deg;</span> angular error (log)</span>
+      <span class="key dirkey" hidden><img src="assets/results/error-legend.png" alt="Error direction legend" width="40" height="40"> error direction (hue) and size</span>
+      <span class="key"><span class="ramp sup"></span> support: observations retained per 16&times;16-pixel cell (log)</span>
+      <span class="key"><span class="sw miss"></span> outside the valid image or no estimate</span>
+    </div>
+    <div class="colhead" aria-hidden="true">
+      <span style="flex:4">Input frames</span><span style="flex:2">Ground truth (sphere, map)</span><span style="flex:2">Angular error: best baseline, RayCal</span><span style="flex:1">RayCal support</span>
+    </div>
+    <div id="rows" class="rows"></div>
+    <p id="more" class="more" hidden><button id="showmore" class="btn">Show more</button></p>
+  </section>
+
+  <section id="qualitative">
+    <h2>Qualitative Comparison</h2>
+    <figure>
+      <img src="assets/figures/qualitative.jpg" alt="Input frames, ground truth and angular error maps of the strongest baseline and RayCal on six sequences" loading="lazy">
+      <figcaption>Angular error of the strongest baseline and of RayCal on difficult sequences: a dark winter forest, uneven illumination in a sewer, repeated supermarket structures and severe spatial warping.</figcaption>
+    </figure>
+    <figure class="narrow">
+      <img src="assets/figures/support.jpg" alt="Per-pixel error against support across calibrated sequences" loading="lazy">
+      <figcaption><b>Support maps</b> indicate where the calibration is well constrained: per-pixel error rises where few observations constrain the ray map.</figcaption>
+    </figure>
+  </section>
+
+  <section id="citation">
+    <h2>Citation</h2>
+    <p class="muted">The citation will be provided after the review period.</p>
+  </section>
+</main>
+
+<footer class="wrap foot">Anonymous project page for double-blind review. No tracking, cookies or third-party resources are used.</footer>
+<script src="assets/js/explorer.js"></script>
+</body>
+</html>
