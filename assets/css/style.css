@@ -22,8 +22,9 @@ a { color: var(--accent); }
 
 .hero { text-align: center; padding-block: 56px 28px; }
 .venue { margin: 0 0 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; margin: 0 auto 14px; max-width: 22ch; text-wrap: balance; }
-h1 .name { color: var(--accent); }
+h1 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0 auto 16px; }
+h1 .name { display: block; color: var(--accent); font-size: clamp(36px, 6vw, 56px); letter-spacing: .01em; }
+h1 .subtitle { display: block; font-size: clamp(20px, 2.6vw, 28px); margin-top: 6px; text-wrap: balance; }
 .authors { margin: 0 0 6px; font-size: 17px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
 .affils { color: var(--muted); margin: 0 0 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
 .notes { color: var(--muted); font-size: 13px; margin: 0 0 22px; }
