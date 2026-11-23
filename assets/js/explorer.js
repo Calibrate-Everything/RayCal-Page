@@ -80,15 +80,20 @@
       const q = find.value.trim().toLowerCase();
       current = g.rows.filter(r => !q || r.label.toLowerCase().includes(q));
       sortRows(current);
-      rowsEl.innerHTML = ''; shown = 0;
+      rowsEl.innerHTML = ''; rowsEl.scrollTop = 0; shown = 0;
     }
     const next = current.slice(shown, shown + PAGE);
     const frag = document.createDocumentFragment();
     next.forEach(r => frag.appendChild(rowEl(g, r)));
     rowsEl.appendChild(frag); shown += next.length;
-    countEl.textContent = `${shown} of ${current.length} sequences`;
-    moreEl.hidden = shown >= current.length;
+    countEl.textContent = `${current.length} sequences`;
+    moreEl.hidden = true;
   }
+
+  // The rows scroll inside their own box; the next batch loads near its bottom.
+  rowsEl.addEventListener('scroll', () => {
+    if (shown < current.length && rowsEl.scrollTop + rowsEl.clientHeight > rowsEl.scrollHeight - 600) render(false);
+  }, { passive: true });
 
   document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
