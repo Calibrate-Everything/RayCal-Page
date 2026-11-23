@@ -8,6 +8,7 @@ from PIL import Image
 sys.path.insert(0, os.path.join(os.environ['RAYCAL_ROOT'], 'code/Spherical-Calibration-combined/src'))  # RAYCAL_ROOT: local data root
 from spherical_calibration.visualization.bearing_error import bearing_error_rgb, bearing_error_legend, spherical_bearing_error
 from spherical_calibration.visualization._render.sphere import sphere_view
+import eff_support as S   # effective support (soft observations per control), as in the paper
 ERR = dict(curve='asinh', soft_scale_deg=0.1, full_scale_deg=10.0)
 G = os.environ['RAYCAL_ROOT']; T3 = f'{G}/psc-ocean/init-study/table3'; U5 = f'{G}/migcheck/formal/scale/U5R'  # reported runs
 F = f'{G}/migcheck/formal'
@@ -173,7 +174,7 @@ def render(case, root, kind):
         out['best'] = [NAMES[best[0]], best[1]['Mean_deg'], best[1]['P90_deg']]
     gn = np.where(sup[..., None], g / np.maximum(np.linalg.norm(g, axis=-1, keepdims=True), 1e-12), 0.0)
     none = np.full((H, W, 3), 128, np.uint8)
-    A = {'frames': frames, 'gt_sphere': sphere_rgb(gn, sup, H, W), 'gt_map': dir_rgb(gn, sup), 'support': sup_rgb(cnt, sup),
+    A = {'frames': frames, 'gt_sphere': sphere_rgb(gn, sup, H, W), 'gt_map': dir_rgb(gn, sup), 'support': eff_rgb(S.effective(cnt, W == 2 * H)[0], sup),
          'our_sphere': sphere_rgb(pa, vo, H, W), 'our_map': dir_rgb(pa, vo),  # ours after the scoring rotation
          'mag': (err_rgb(np.where(eb[1], ang(eb[0], g), 180.0), sup) if eb is not None else none, err_rgb(eo, sup)),
          'dir': (bear_rgb(eb[0], gn, eb[1]) if eb is not None else none, bear_rgb(pa, gn, vo)),
@@ -185,14 +186,14 @@ def job(item):
     try:
         A, out = render(case, root, kind); out['label'] = label
         strips = []
-        for style in ('mag', 'dir', 'sch'):
+        for style in ('sch',):   # the paper's error visualization (direction hue, magnitude saturation)
             panels = [panel(f) for f in A['frames']] + [panel(A['gt_sphere']), panel(A['gt_map']), panel(A[style][0]), panel(A[style][1]), panel(A['support'])]
             gap = 4; Wt = sum(q.width for q in panels) + gap * (len(panels) - 1) + 3 * gap * len(ORDER_GAPS)
             strip = Image.new('RGB', (Wt, PH), (255, 255, 255)); x = 0
             for i, q in enumerate(panels):
                 strip.paste(q, (x, 0)); x += q.width + gap + (3 * gap if i in ORDER_GAPS else 0)
             strips.append(strip)
-            if style == 'mag': out['widths'] = [q.width for q in panels]
+            out['widths'] = [q.width for q in panels]
         return gi, out, strips
     except Exception as ex:  # noqa: BLE001
         return gi, {'case': case, 'label': label, 'error': repr(ex)[:200]}, None
@@ -209,14 +210,12 @@ if __name__ == '__main__':
         res = [(o, s) for g2, o, s in results if g2 == gi]
         if not res: continue
         W = max([s[0].width for _, s in res if s is not None] + [10]); Hs = (PH + 8) * len(res)
-        sprites = [Image.new('RGB', (W, Hs), (255, 255, 255)) for _ in range(3)]; rows = []
+        sprites = [Image.new('RGB', (W, Hs), (255, 255, 255))]; rows = []
         for i, (o, s) in enumerate(res):
             if s is not None:
-                for k in range(3): sprites[k].paste(s[k], (0, i * (PH + 8)))
+                sprites[0].paste(s[0], (0, i * (PH + 8)))
             o['y'] = i * (PH + 8); rows.append(o)
         sprites[0].save(f'{OUT}/{gid}.jpg', quality=82, optimize=True)
-        sprites[1].save(f'{OUT}/{gid}-dir.jpg', quality=82, optimize=True)
         meta.append({'id': gid, 'title': title, 'kind': kind, 'width': W, 'height': Hs, 'ph': PH, 'rows': rows})
     json.dump(meta, open(f'{OUT}/meta.json', 'w'))
-    Image.fromarray(bearing_error_legend(size=220, **ERR)).save(f'{OUT}/error-legend.png')
     print('done', sum(len(m['rows']) for m in meta), 'rows', sum(1 for m in meta for r in m['rows'] if 'error' in r), 'errors')

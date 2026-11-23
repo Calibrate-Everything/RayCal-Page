@@ -1,4 +1,4 @@
-// Results explorer: one JPEG sprite per sequence group (assets/results/<group>.jpg, -dir.jpg for the direction style)
+// Results explorer: one JPEG sprite per sequence group (assets/results/<group>.jpg, the paper's error and support style)
 // and assets/results/meta.json with each row's offset and scores. Rows are drawn as scaled background windows.
 (function () {
   'use strict';
@@ -6,12 +6,11 @@
   const PAGE = 40;            // rows rendered per batch
   const GAP = 4, EXTRA = 3 * GAP, N_EXTRA = 3;   // panel gaps used by tools/build_results.py
   const groupSel = document.getElementById('group');
-  const styleSel = document.getElementById('style');
+  const sortSel = document.getElementById('sort');
   const find = document.getElementById('find');
   const rowsEl = document.getElementById('rows');
   const countEl = document.getElementById('count');
   const moreEl = document.getElementById('more');
-  const dirKey = document.querySelector('.dirkey');
   let meta = [], kind = 'main', shown = 0, current = [];
 
   const fmt = v => (v === null || v === undefined || isNaN(v)) ? '–' : (v >= 10 ? v.toFixed(1) : v >= 1 ? v.toFixed(2) : v.toFixed(3));
@@ -47,7 +46,7 @@
       const wt = stripWidth(r.widths), ph = g.ph;
       s.className = 'strip';
       s.style.aspectRatio = `${wt} / ${ph}`;
-      const file = BASE + g.id + (styleSel.value === 'dir' ? '-dir' : '') + '.jpg';
+      const file = BASE + g.id + '.jpg';
       s.style.backgroundImage = `url("${file}")`;
       s.style.backgroundSize = `${(g.width / wt) * 100}% auto`;
       const span = g.height - ph;
@@ -59,12 +58,28 @@
     return d;
   }
 
+  // Missing scores sort last; the improvement is the best baseline's Mean over ours (no baseline output counts as largest).
+  const ours = r => (r.ours && r.ours[0] != null) ? r.ours[0] : Infinity;
+  const base = r => (r.best && r.best[1] != null) ? r.best[1] : Infinity;
+  const gain = r => (ours(r) === Infinity) ? -Infinity : base(r) / ours(r);
+  function sortRows(rows) {
+    const by = {
+      'name': (a, b) => a.label.localeCompare(b.label),
+      'ours-asc': (a, b) => ours(a) - ours(b),
+      'ours-desc': (a, b) => (ours(b) === Infinity ? -1 : ours(a) === Infinity ? 1 : ours(b) - ours(a)),
+      'base-desc': (a, b) => base(b) - base(a),
+      'gain-desc': (a, b) => gain(b) - gain(a),
+    }[sortSel.value];
+    rows.sort((a, b) => by(a, b) || a.label.localeCompare(b.label));
+  }
+
   function render(reset) {
     const g = meta.find(x => x.id === groupSel.value);
     if (!g) return;
     if (reset) {
       const q = find.value.trim().toLowerCase();
       current = g.rows.filter(r => !q || r.label.toLowerCase().includes(q));
+      sortRows(current);
       rowsEl.innerHTML = ''; shown = 0;
     }
     const next = current.slice(shown, shown + PAGE);
@@ -80,7 +95,7 @@
     kind = b.dataset.kind; fillGroups(); render(true);
   }));
   groupSel.addEventListener('change', () => render(true));
-  styleSel.addEventListener('change', () => { dirKey.hidden = styleSel.value !== 'dir'; render(true); });
+  sortSel.addEventListener('change', () => render(true));
   find.addEventListener('input', () => render(true));
   document.getElementById('showmore').addEventListener('click', () => render(false));
 

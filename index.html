@@ -60,25 +60,29 @@
 
   <section id="explorer">
     <h2>Results Explorer</h2>
-    <p class="lede">Every sequence of the benchmark, with the same results as the paper's tables. Each row shows four input frames, the ground-truth ray sphere and ray map, the angular error of the best baseline on that sequence and of RayCal (after one global rotation), and RayCal's support map.</p>
+    <p class="lede">Every sequence of the benchmark, with the same results as the paper's tables. Each row shows four input frames, the ground-truth ray sphere and ray map, the angular error of the best baseline on that sequence and of RayCal (after one global rotation), and RayCal's effective support.</p>
     <div class="controls" role="group" aria-label="Explorer controls">
       <div class="seg" role="tablist" aria-label="Benchmark">
         <button role="tab" data-kind="main" aria-selected="true">Main benchmark</button>
         <button role="tab" data-kind="dist" aria-selected="false">Distortion study</button>
       </div>
       <label>Set <select id="group"></select></label>
-      <label>Error <select id="style"><option value="mag">Magnitude</option><option value="dir">Direction</option></select></label>
+      <label>Sort <select id="sort">
+        <option value="name">Sequence name</option>
+        <option value="ours-asc">RayCal error, low to high</option>
+        <option value="ours-desc">RayCal error, high to low</option>
+        <option value="base-desc">Best baseline error, high to low</option>
+        <option value="gain-desc">Improvement over best baseline</option>
+      </select></label>
       <label class="grow">Find <input id="find" type="search" placeholder="sequence name" autocomplete="off"></label>
       <span id="count" class="count" aria-live="polite"></span>
     </div>
     <div class="legend">
-      <span class="key"><span class="ramp mag"></span><span class="mono">0.01&deg; &hellip; 10&deg;</span> angular error (log)</span>
-      <span class="key dirkey" hidden><img src="assets/results/error-legend.png" alt="Error direction legend" width="40" height="40"> error direction (hue) and size</span>
-      <span class="key"><span class="ramp sup"></span> support: observations retained per 16&times;16-pixel cell (log)</span>
-      <span class="key"><span class="sw miss"></span> outside the valid image or no estimate</span>
+      <span class="key"><img src="assets/figures/qualitative-legend.jpg" alt="Legend: error wheel (hue is the error direction, saturation its magnitude, rings at 0.25, 1, 3 and 10 degrees) and effective support bar (0 to at least 1000)" height="70"></span>
+      <span class="key">Error: hue gives the direction, saturation the magnitude (rings at 0.25&deg;, 1&deg;, 3&deg;, 10&deg;). Support: effective support, observations per control point (log).</span>
     </div>
     <div class="colhead" aria-hidden="true">
-      <span style="flex:4">Input frames</span><span style="flex:2">Ground truth (sphere, map)</span><span style="flex:2">Angular error: best baseline, RayCal</span><span style="flex:1">RayCal support</span>
+      <span style="flex:4">Input frames</span><span style="flex:2">Ground truth (sphere, map)</span><span style="flex:2">Angular error: best baseline, RayCal</span><span style="flex:1">RayCal effective support</span>
     </div>
     <div id="rows" class="rows"></div>
     <p id="more" class="more" hidden><button id="showmore" class="btn">Show more</button></p>
